@@ -7,12 +7,28 @@ const lineNumber = 'line-number';
 
 void main(List<String> arguments) {
   exitCode = 0; // presume success
+  if (!hasPermission()) return stdout.writeln('Password incorrect');
+
   final parser = ArgParser()..addFlag(lineNumber, negatable: false, abbr: 'n');
 
   ArgResults argResults = parser.parse(arguments);
   final paths = argResults.rest;
 
   dcat(paths, showLineNumbers: argResults[lineNumber] as bool);
+}
+
+/// Ask user to enter the password,
+/// if passwork is wrong, terminate the program.
+bool hasPermission() {
+  stdout.writeln('Please enter password');
+  final echoMode = stdin.echoMode;
+  stdin.echoMode = false;
+
+  final password = stdin.readLineSync();
+
+  stdin.echoMode = echoMode;
+
+  return password == 'zmkm';
 }
 
 Future<void> dcat(List<String> paths, {bool showLineNumbers = false}) async {
@@ -42,9 +58,7 @@ Future<void> _handleError(String path) async {
     return stderr.writeln('error: $path is a directory');
   }
 
-  var file = File(path);
-
-  if (!file.existsSync()) {
+  if (!File(path).existsSync()) {
     return stderr.writeln('File $path not exists.');
   }
 
